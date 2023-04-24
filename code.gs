@@ -23,16 +23,31 @@ function onFormSubmit(e) {
   const noWa = answers[2];
 
   if (capacity >= 0) {
+
+    const qrCode = UrlFetchApp
+      .fetch('https://chart.googleapis.com/chart', {
+        'method': 'post',
+        'payload': {
+          'cht': 'qr',
+          'chl': name + '-' + selectedPeriod + ' [' + capacity + ']',
+          'chs': '300x300'
+        }
+      })
+      .getBlob()
+      .setName("qrCode");
+
     const html = `
       <p>Bapak/Ibu ${name}</p>
       <p>Pendaftaran untuk tanggal ${selectedPeriod} berhasil</p>
       <p>Mohon hadir tepat waktu</p>
       <p>Silakan tunjukkan barcode di bawah ini kepada petugas</p>
+      <p><img src="cid:qrCode"></p>
     `;
     MailApp.sendEmail({
       to: email,
       subject: 'Pendaftaran ' + name,
       htmlBody: html,
+      inlineImages: { qrCode: qrCode }
     })
   }
   else {
