@@ -1,5 +1,5 @@
-const formId = ''; // isi dengan form id
-const sheetId = ''; // isi dengan google sheeet response id
+const formId = '';
+const sheetId = '';
 
 const form = FormApp.openById(formId);
 const wsPeriod = SpreadsheetApp.openById(sheetId).getSheetByName('Period');
@@ -7,13 +7,10 @@ const questionTitle = 'Silakan Pilih Jadwal:';
 const itemId = getIdByTitle(questionTitle);
 
 function onOpen(e) {
-  const periods = getPeriodsData();
-  const periodsLabel = periods.map((period) => { return period[0]; });
-  updateDropdown(periodsLabel);
+  updatePeriods();
 }
 
 function onFormSubmit(e) {
-
   const formResponses = form.getResponses();
   const count = formResponses.length;
   const formReseponse = formResponses[count - 1];
@@ -25,7 +22,7 @@ function onFormSubmit(e) {
   const name = answers[1];
   const noWa = answers[2];
 
-  if(capacity >= 0) {
+  if (capacity >= 0) {
     const html = `
       <p>Bapak/Ibu ${name}</p>
       <p>Pendaftaran untuk tanggal ${selectedPeriod} berhasil</p>
@@ -34,11 +31,11 @@ function onFormSubmit(e) {
     `;
     MailApp.sendEmail({
       to: email,
-      subject: 'Pendaftaran '+ name ,
+      subject: 'Pendaftaran ' + name,
       htmlBody: html,
     })
   }
-  else{
+  else {
     const html = `
       <p>Bapak/Ibu ${name}</p>
       <p>Mohon maaf, pendaftaran untuk tanggal ${selectedPeriod} sudah tidak tersedia</p>
@@ -46,12 +43,13 @@ function onFormSubmit(e) {
     `;
     MailApp.sendEmail({
       to: email,
-      subject: 'Pendaftaran '+ name + ' sudah tidak tersedia',
+      subject: 'Pendaftaran ' + name + ' sudah tidak tersedia',
       htmlBody: html,
     })
 
     // @todo, menghapus baris pada response ini
   }
+  updatePeriods();
 }
 
 function getIdByTitle(title) {
@@ -59,6 +57,12 @@ function getIdByTitle(title) {
   const titles = items.map((item) => { return item.getTitle(); });
   const pos = titles.indexOf(title);
   return items[pos].getId();
+}
+
+function updatePeriods() {
+  const periods = getPeriodsData();
+  const periodsLabel = periods.map((period) => { return period[0]; });
+  updateDropdown(periodsLabel);
 }
 
 function getPeriodsData() {
